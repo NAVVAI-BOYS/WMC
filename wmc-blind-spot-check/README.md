@@ -1,27 +1,47 @@
 # WMC Global · Mobile Blind Spot Check
 
-Single self-contained HTML lead magnet. No build step, no dependencies, no backend.
+Lead magnet web app. Node + Express serving one self-contained HTML file.
 
-- `public/index.html` — the whole app: questions, scoring, report, brand assets embedded as base64
-- `render.yaml` — optional Render blueprint
+```
+public/index.html   the whole app - questions, scoring, report, brand assets inline
+server.js           serves it, plus POST /lead
+package.json        one dependency (express)
+```
 
 ## Deploy on Render
 
-New + → Static Site → connect this repo.
+New + → **Web Service** → connect this repo.
 
 | Field | Value |
 |---|---|
-| Build Command | *(leave empty)* |
-| Publish Directory | `public` |
-| Branch | `main` |
+| Root Directory | *(leave empty)* |
+| Build Command | `npm install` |
+| Start Command | `npm start` |
+| Health Check Path | `/healthz` |
 
-## Notes
+Node version is pinned to 18+ in `package.json`. Nothing else to configure.
 
-- The only outbound request is Google Fonts. Everything else is inline.
-- The gate collects name, email, company and role but **does not send them anywhere**. See "Lead capture" below.
-- Auto-deploys on push to `main`.
+## Routes
 
-## Lead capture
+| Route | Does |
+|---|---|
+| `/` | the check |
+| `/lead` (POST) | receives the captured lead |
+| `/healthz` | health check for Render |
+| anything else | serves the check |
 
-Not wired. The app is honest about this on screen ("Demo build"). To make it live,
-POST the gate object to an endpoint in the `#gGo` click handler.
+## Leads
+
+The gate posts to `/lead` on unlock: name, email, company, role, route taken,
+verdict, weakest area and score, gap count, stated goal, recommended first move.
+
+Right now `server.js` writes them to stdout, so they appear in the Render logs.
+To send them somewhere real, change that one handler. Nothing in the front end moves.
+
+The post is fire and forget: if it fails, the reader still gets their report.
+
+## Note on the free tier
+
+A free Render **web service sleeps after inactivity**, so the first visitor after a
+quiet period waits roughly 30 to 50 seconds. For a link going out to prospects, use
+a paid instance. A Static Site would not sleep, but has no backend to receive leads.

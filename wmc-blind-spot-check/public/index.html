@@ -1765,6 +1765,23 @@ function calc(){
   return R;
 }
 
+/* ---------- lead capture ----------
+   Fire and forget. If there is no server behind it, or the file is opened from
+   disk, the catch swallows it and the reader still gets their report. */
+function postLead(R){
+  try{
+    fetch('/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        firstName:S.gate.f, surname:S.gate.l, email:S.gate.e, company:S.gate.c, role:S.gate.r,
+        route:S.L.name, verdict:R.band.n,
+        weakestArea:R.weakest.n, weakestScore:+f1(R.weakest.score),
+        gaps:R.gaps.length, goal:S.typed.goal||(S.ans.goal?S.ans.goal.label:null),
+        firstMove:R.moves[0]?R.moves[0].title:null,
+        currency:CURK, at:new Date().toISOString()
+      })}).catch(()=>{});
+  }catch(e){}
+}
+
 /* ---------- gate ---------- */
 function openGate(){
   const R=calc();
@@ -1785,6 +1802,7 @@ $('#gGo').addEventListener('click',()=>{
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){err.textContent='That does not look like an email address.';err.classList.add('on');return;}
   err.classList.remove('on');
   S.gate={f,l,e,c,r};
+  postLead(R);
   buildReport();
 });
 </script>
@@ -2379,7 +2397,7 @@ function closing(R){
    +'<button class="btn btn-ghost" id="aRe">Start again</button>'
    +'</div>';
   h+='<div class="honest"><b>Honest by design, even where it costs the sale.</b> Every figure above is computed from numbers you supplied, and the arithmetic is printed next to each one. Scores come only from tapped answers; anything you typed is quoted and never scored. Where a figure could not be computed honestly it is left as a count or left out, and the reason is stated. No prices for WMC Global work appear anywhere in this report.'
-   +'<br><br><b>Demo build.</b> Download saves a real copy of this page. Email opens a draft in your mail app. WhatsApp opens a real share. The booking button opens wmcglobal.com. In the live version the report emails itself on unlock and posts the lead to the WMC Global team.'
+   +'<br><br><b>Demo build.</b> Download saves a real copy of this page. Email opens a draft in your mail app. WhatsApp opens a real share. The booking button opens wmcglobal.com. Your details have been posted to the WMC Global team. Automatic email delivery of the report is not switched on in this build, so use Download or Email me this report above to keep a copy.'
    +'<br><br>WMC Global · Mobile threat intelligence and disruption · Prepared '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' · Built for WMC Global by Navvai</div>';
   h+='</div></section>';
   return h;
@@ -2411,7 +2429,7 @@ function buildReport(){
    +'<div class="r-for">Prepared for '+esc(name)+' at '+esc(S.gate.c)+' · built by WMC Global</div>'
    +'<p class="r-oneline">That sets your verdict at <b>'+R.band.n.toLowerCase()+'</b>. On this channel the weakest thing is the whole of your defence, because an attacker only has to find it once.</p>'
    +'<div style="margin-top:16px"><span class="readtime" id="readTime">Read it end to end in about 25 minutes</span></div>'
-   +'<div class="notice">Your details have reached the WMC Global team. Email delivery is not switched on for this build, so nothing has been sent to your inbox. Use <b>Download this report</b> or <b>Email me this report</b> at the end to keep a copy.</div>'
+   +'<div class="notice">Your details have reached the WMC Global team. Automatic email delivery is not switched on in this build, so nothing has landed in your inbox. Use <b>Download this report</b> or <b>Email me this report</b> at the end to keep a copy.</div>'
    +'</div></div>';
 
   h+='<div class="whatis"><div class="wrap"><p class="wi"><b>How this report is laid out.</b> Five parts, in one continuous read, in the order the conversation actually goes. Nothing is hidden behind a button: every part is open on the page, and the map below shows what each one does. <b>What WMC Global does, in one line:</b> finds, verifies and shuts down mobile phishing before it becomes fraud.</p></div></div>';
